@@ -20,46 +20,7 @@ An end-to-end MLOps system that ingests live transaction data from Kafka, trains
 
 ## Architecture Overview
 
-```
-┌─────────────────────────────────────────────────────────────────────────┐
-│                        DATA PRODUCTION LAYER                            │
-│                                                                         │
-│   Python Producer (×2 replicas)                                         │
-│   └── Synthetic transaction generator with realistic fraud patterns     │
-│       └── Confluent Cloud Kafka  ──►  transactions topic                │
-└──────────────────────────────────┬──────────────────────────────────────┘
-                                   │
-          ┌────────────────────────┴──────────────────────────┐
-          │                                                   │
-          ▼                                                   ▼
-┌─────────────────────┐                          ┌───────────────────────┐
-│  TRAINING LAYER      │                          │  INFERENCE LAYER      │
-│                      │                          │                       │
-│  Airflow DAG         │                          │  Fraud Consumer       │
-│  (daily @ 03:00 UTC) │                          │  ├── Loads champion   │
-│  ├── Validate env    │                          │  │   model from       │
-│  ├── Consume Kafka   │                          │  │   MLflow           │
-│  ├── Feature eng.    │                          │  ├── Engineers        │
-│  ├── SMOTE + XGBoost │                          │  │   features         │
-│  ├── Threshold opt.  │                          │  ├── Scores each txn  │
-│  ├── Log to MLflow   │                          │  └── Publishes to     │
-│  └── Promote champion│                          │      fraud_predictions│
-└──────────┬───────────┘                          └──────────┬────────────┘
-           │                                                  │
-           ▼                                                  ▼
-┌─────────────────────────────┐              ┌───────────────────────────┐
-│  MODEL REGISTRY LAYER        │              │  OBSERVABILITY LAYER       │
-│                              │              │                           │
-│  MLflow Server  (:5500)      │              │  Predictions Sink         │
-│  └── Experiment tracking     │              │  └── Kafka consumer       │
-│  └── Model versioning        │◄─────────── │      writing to           │
-│  └── Champion alias          │              │      PostgreSQL            │
-│                              │              │                           │
-│  MinIO  (:9000)              │              │  Grafana  (:3001)         │
-│  └── Model artifacts (S3)    │              │  └── Live dashboard       │
-│  └── Plots, metrics          │              │  └── Fraud rate, alerts   │
-└─────────────────────────────┘              └───────────────────────────┘
-```
+![Architecture](./img/overall.png)
 
 ---
 
