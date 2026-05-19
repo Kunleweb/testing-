@@ -1,4 +1,4 @@
-# Real-Time Fraud Detection Pipeline
+# Real-Time Fraud Detection MLOps Platform
 
 Production-grade real-time fraud detection platform featuring automated MLOps pipelines for training, model promotion, inference, and monitoring. 
 
