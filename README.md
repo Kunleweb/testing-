@@ -10,25 +10,6 @@ Production-grade real-time fraud detection platform featuring automated MLOps pi
 
 ---
 
-## Tech Stack
-
-| Layer | Technology | Purpose |
-|---|---|---|
-| Data streaming | Confluent Cloud Kafka | Transaction ingestion & prediction output |
-| Orchestration | Apache Airflow 3.0 (Celery) | Scheduled model training pipeline |
-| ML Framework | XGBoost + scikit-learn | Fraud classification |
-| Class balancing | SMOTE (imbalanced-learn) | Handle ~0.3% fraud rate |
-| Hyperparameter tuning | RandomizedSearchCV | Automated model optimisation |
-| Experiment tracking | MLflow 3.x | Metrics, artifacts, model registry |
-| Artifact storage | MinIO (S3-compatible) | Model files, plots, thresholds |
-| Metadata database | PostgreSQL 16 | Airflow, MLflow, predictions storage |
-| Task queue | Redis + Celery | Airflow worker message bus |
-| Inference serving | Python Kafka consumer | Real-time transaction scoring |
-| Monitoring | Grafana + PostgreSQL | Live fraud dashboard |
-| Containerisation | Docker Compose | Full stack orchestration |
-
----
-
 ## Project Structure
 
 ```
@@ -93,7 +74,7 @@ Raw Kafka fields are enriched with the following features before training and in
 |---|---|---|
 | `amount` | Raw | Transaction value |
 | `log_amount` | Engineered | `log1p(amount)` : reduces skew |
-| `hour` | Timestamp | Hour of day (0–23) |
+| `hour` | Timestamp | Hour of day (0-23) |
 | `day_of_week` | Timestamp | Day of week (0=Mon, 6=Sun) |
 | `is_weekend` | Timestamp | Binary flag |
 | `is_night` | Timestamp | 1 if hour ≥ 22 or ≤ 6 |
@@ -103,8 +84,6 @@ Raw Kafka fields are enriched with the following features before training and in
 | `merchant` | Raw (encoded) | OrdinalEncoder |
 
 ### Fraud Simulation Patterns (Producer)
-
-The producer generates realistic fraud transactions with a target rate of ~1–2%:
 
 | Pattern | Weight | Description |
 |---|---|---|
@@ -179,7 +158,7 @@ docker exec src-airflow-worker-1 airflow dags trigger fraud_detection_training
 ```
 
 The first run will:
-1. Consume all available transactions from Kafka (~15–30 minutes depending on volume)
+1. Consume all available transactions from Kafka (~15-30 minutes depending on volume)
 2. Train and tune the XGBoost model
 3. Register it in MLflow as `fraud_detection_xgboost` with the `champion` alias
 4. The inference consumer will automatically reload the new champion
